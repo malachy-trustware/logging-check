@@ -1,6 +1,84 @@
 import Image from 'next/image'
+//import { pinoTest } from '../helpers/pinoTest'
+
+// const logger = require('../helpers/pinoTest');
+//const pino = require('pino');
+// logger.error({ "info": 'Hello, world!' });
+
+//  logger = pino({
+//   transport: {
+//     target: "pino-sentry-transport",
+//     options: {
+//       sentry: {
+//         dsn: "https://<key>:<secret>@sentry.io/<project>",
+//         // additional options for sentry
+//       },
+//       withLogRecord: true, // default false - send the log record to sentry as a context.(if its more then 8Kb Sentry will throw an error)
+//       tags: ['id'], // sentry tags to add to the event, uses lodash.get to get the value from the log record
+//       context: ['hostname'], // sentry context to add to the event, uses lodash.get to get the value from the log record,
+//       minLevel: 40, // which level to send to sentry
+//     }
+//   },
+// });
+
+//const pino = require('pino');
+// const SentryTransport = require('pino-sentry-transport');
+
+// const logger = pino({
+//   level: 'info',
+//   transport: {
+//     target: "pino-sentry-transport",
+//     options: {
+//       sentry: {
+//         dsn: "https://e40788cc54834eda95fdaf21c3edac89@o4505430930620416.ingest.sentry.io/4505442435596288",
+//         // additional options for sentry
+//       },
+//       withLogRecord: true, // default false - send the log record to sentry as a context.(if its more then 8Kb Sentry will throw an error)
+//       // tags: ['id'], // sentry tags to add to the event, uses lodash.get to get the value from the log record
+//       // context: ['hostname'], // sentry context to add to the event, uses lodash.get to get the value from the log record,
+//       // minLevel: 40, // which level to send to sentry
+//     }
+//   },
+// });
+
+// logger.info('Hello World!');
+import pino from 'pino'
+import { logflarePinoVercel } from 'pino-logflare'
+
+// create pino-logflare console stream for serverless functions and send function for browser logs
+const { stream, send } = logflarePinoVercel({
+  apiKey: "UvhW-oN4QpcU",
+  sourceToken: "cac032d9-bbab-458e-b249-56c9bbbc0e0d"
+});
+
+// create pino logger
+const logger = pino({
+  browser: {
+    transmit: {
+      level: "info",
+      send: send,
+    }
+  },
+  level: "debug",
+  base: {
+    env: process.env.VERCEL_ENV,
+    revision: process.env.VERCEL_GITHUB_COMMIT_SHA,
+  },
+}, stream);
+
+logger.info({
+  user: {
+    name: "Joe Schmo",
+    email: "joe@dunder.dev",
+    company: "Dunder Dev",
+    id: 38,
+  },
+  event: { type: "request", tag: "api" },
+});
+
 
 export default function Home() {
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
